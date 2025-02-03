@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-
 import axios from "axios";
 import getBaseUrl from "../utils/baseURL";
 import { useNavigate } from "react-router-dom";
 
-const AdminLogin = () => {
+const AdminSignup = () => {
 	const [message, setMessage] = useState("");
 	const {
 		register,
 		handleSubmit,
-		watch,
 		formState: { errors }
 	} = useForm();
 
 	const navigate = useNavigate();
 
 	const onSubmit = async (data) => {
-		// console.log(data)
 		try {
+			// Make sure this URL matches your backend route
 			const response = await axios.post(
-				`${getBaseUrl()}/api/auth/admin`,
+				`${getBaseUrl()}/api/auth/admin/signup`,
 				data,
 				{
 					headers: {
@@ -29,27 +27,30 @@ const AdminLogin = () => {
 				}
 			);
 			const auth = response.data;
-			//    console.log(auth)
+
 			if (auth.token) {
 				localStorage.setItem("token", auth.token);
 				setTimeout(() => {
 					localStorage.removeItem("token");
-					alert("Token has been expired!, Please login again.");
+					alert("Token has expired! Please login again.");
 					navigate("/");
 				}, 3600 * 1000);
 			}
 
-			alert("Admin Login successful!");
+			alert("Admin account created successfully!");
 			navigate("/dashboard");
 		} catch (error) {
-			setMessage("Please provide a valid email and password");
+			setMessage(
+				error.response?.data?.message || "Failed to create admin account"
+			);
 			console.error(error);
 		}
 	};
+
 	return (
-		<div className="h-screen flex justify-center items-center ">
+		<div className="h-screen flex justify-center items-center">
 			<div className="w-full max-w-sm mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-				<h2 className="text-xl font-semibold mb-4">Admin Dashboard Login </h2>
+				<h2 className="text-xl font-semibold mb-4">Admin Signup</h2>
 
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className="mb-4">
@@ -62,9 +63,23 @@ const AdminLogin = () => {
 						<input
 							{...register("username", { required: true })}
 							type="text"
-							name="username"
 							id="username"
-							placeholder="username"
+							placeholder="Username"
+							className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow"
+						/>
+					</div>
+					<div className="mb-4">
+						<label
+							className="block text-gray-700 text-sm font-bold mb-2"
+							htmlFor="email"
+						>
+							Email
+						</label>
+						<input
+							{...register("email", { required: true, pattern: /^\S+@\S+$/i })}
+							type="email"
+							id="email"
+							placeholder="Email"
 							className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow"
 						/>
 					</div>
@@ -76,9 +91,8 @@ const AdminLogin = () => {
 							Password
 						</label>
 						<input
-							{...register("password", { required: true })}
+							{...register("password", { required: true, minLength: 6 })}
 							type="password"
-							name="password"
 							id="password"
 							placeholder="Password"
 							className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow"
@@ -89,20 +103,18 @@ const AdminLogin = () => {
 					)}
 					<div className="w-full">
 						<button className="bg-blue-500 w-full hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none">
-							Login
+							Sign Up
 						</button>
 					</div>
 				</form>
 
 				<div className="mt-4 text-center">
-					<p className="text-sm text-gray-600 mb-2">
-						Don't have an admin account?
-					</p>
+					<p className="text-sm text-gray-600 mb-2">Already have an account?</p>
 					<button
-						onClick={() => navigate("/admin/signup")}
+						onClick={() => navigate("/admin")}
 						className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-8 rounded focus:outline-none"
 					>
-						Sign Up
+						Login
 					</button>
 				</div>
 
@@ -114,4 +126,4 @@ const AdminLogin = () => {
 	);
 };
 
-export default AdminLogin;
+export default AdminSignup;
