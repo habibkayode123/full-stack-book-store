@@ -3,8 +3,12 @@ const app = express();
 const cors = require("cors");
 
 const mongoose = require("mongoose");
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 require('dotenv').config()
+
+
+const uri =
+	"mongodb+srv://habibkayodenew:Chd83ZmCjakx51ad@cluster0.peeye.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // middleware
 app.use(express.json());
@@ -25,7 +29,7 @@ app.use("/api/auth", userRoutes)
 app.use("/api/admin", adminRoutes)
 
 async function main() {
-  await mongoose.connect(process.env.DB_URL);
+  await mongoose.connect(uri);
   app.use("/", (req, res) => {
     res.send("Book Store Server is running!");
   });
